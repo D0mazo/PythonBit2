@@ -27,9 +27,18 @@ generator = pipeline(
     pad_token_id=tokenizer.eos_token_id  # Avoids warning
 )
 
-# Generate text based on a prompt
-prompt = "What is God?"
-text = generator(prompt, max_length=50, truncation=True)
+# Start the conversation loop
+while True:
+    # Get user input from the console
+    prompt = input("Enter a prompt (or type 'thx' to exit): ")
 
-# Print the generated text
-print(text)
+    # If the user types "Aciu", exit the loop and end the program
+    if prompt.lower() == "thx":
+        print("Goodbye!")
+        break
+
+    # Generate text based on the input prompt
+    text = generator(prompt, max_length=50, truncation=True)
+
+    # Print the generated text
+    print("\nGenerated Text: ", text[0]['generated_text'])
