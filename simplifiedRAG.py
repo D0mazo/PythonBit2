@@ -22,26 +22,42 @@ if tokenizer.pad_token is None:
 # Create text-generation pipeline
 generator = pipeline("text-generation", model=model_name, tokenizer=tokenizer, pad_token_id=tokenizer.pad_token_id)
 
-# Knowledge base with predefined questions
-knowledge_base = [
-    ("What is a healthy relationship?", "A healthy relationship is built on trust, communication, respect, and mutual support."),
-    ("How to improve communication in a relationship?", "To improve communication, listen actively, express your feelings honestly, and avoid blaming or criticizing."),
-    ("What are the signs of a toxic relationship?", "Signs of a toxic relationship include constant criticism, lack of trust, controlling behavior, and emotional or physical abuse."),
-    ("How to build trust in a relationship?", "Building trust requires honesty, consistency, keeping promises, and being open about your feelings."),
-    ("What is emotional intimacy?", "Emotional intimacy is the closeness and connection you feel with someone when you share your thoughts, feelings, and vulnerabilities."),
-    ("How to resolve conflicts in a relationship?", "To resolve conflicts, stay calm, listen to each other, find common ground, and work together to find a solution."),
-    ("What is the importance of boundaries in a relationship?", "Boundaries are important because they help define what is acceptable and unacceptable, ensuring mutual respect and understanding."),
-    ("How to maintain a long-distance relationship?", "Maintain a long-distance relationship by communicating regularly, setting goals, and planning visits to stay connected."),
-    ("What is love?", "Love is a deep feeling of affection, care, and commitment towards someone."),
-    ("How to show appreciation in a relationship?", "Show appreciation by expressing gratitude, giving compliments, and doing small acts of kindness."),
-]
+# Load knowledge base from info.txt
+def load_knowledge_base(file_path):
+    """
+    Load questions and answers from a text file.
+    Each line in the file should be in the format: "Question?|Answer."
+    """
+    knowledge_base = []
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            for line in file:
+                line = line.strip()
+                if line:  # Skip empty lines
+                    question, answer = line.split("|")
+                    knowledge_base.append((question.strip(), answer.strip()))
+    except FileNotFoundError:
+        print(f"Error: File '{file_path}' not found.")
+        sys.exit(1)
+    except ValueError:
+        print(f"Error: File '{file_path}' has an invalid format. Each line must contain a question and answer separated by '|'.")
+        sys.exit(1)
+    return knowledge_base
 
+# Define the file path
+file_path = "/Users/Domin/OneDrive/Desktop/PythonBIT/SECOND/info.txt"
+
+# Load the knowledge base
+knowledge_base = load_knowledge_base(file_path)
+
+# Display menu of questions
 def show_questions():
     """Display the list of questions."""
     print("\nAvailable questions:")
     for i, (question, _) in enumerate(knowledge_base, start=1):
         print(f"{i}. {question}")
 
+# Start chat loop
 while True:
     show_questions()
     
@@ -55,7 +71,7 @@ while True:
         choice = int(choice) - 1  # Convert to zero-based index
 
         if 0 <= choice < len(knowledge_base):
-            print("\nRetrieved Answer:", knowledge_base[choice][1])
+            print("\nAnswer:", knowledge_base[choice][1])
         else:
             print("\nInvalid choice! Please choose a valid number.")
             continue  # Go back to the menu
