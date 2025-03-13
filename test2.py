@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 import os
-from transformers import pipeline, AutoTokenizer
 import sys
+from transformers import pipeline, AutoTokenizer
 from colorama import Fore, Style, init
 
 # Initialize colorama for cross-platform support
@@ -26,30 +26,32 @@ if tokenizer.pad_token is None:
 # Create text-generation pipeline
 generator = pipeline("text-generation", model=model_name, tokenizer=tokenizer, pad_token_id=tokenizer.pad_token_id)
 
-def load_knowledge_base(file_path):
+def load_knowledge_base(folder_path):
     """
-    Load questions and answers from a text file.
+    Load questions and answers from all .txt files in the folder (excluding requirements.txt).
     Each line in the file should be in the format: "Question?|Answer."
     """
     knowledge_base = []
-    try:
-        with open(file_path, "r", encoding="utf-8") as file:
-            for line in file:
-                line = line.strip()
-                if line:  # Skip empty lines
-                    question, answer = line.split("|")
-                    knowledge_base.append((question.strip(), answer.strip()))
-    except FileNotFoundError:
-        print(Fore.RED + f"[Error]: File '{file_path}' not found.")
-        sys.exit(1)
-    except ValueError:
-        print(Fore.RED + f"[Error]: Invalid format. Each line must contain a question and answer separated by '|'.")
-        sys.exit(1)
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".txt") and filename != "requirements.txt":
+            file_path = os.path.join(folder_path, filename)
+            try:
+                with open(file_path, "r", encoding="utf-8") as file:
+                    for line in file:
+                        line = line.strip()
+                        if line:
+                            try:
+                                question, answer = line.split("|")
+                                knowledge_base.append((question.strip(), answer.strip()))
+                            except ValueError:
+                                print(Fore.RED + f"[Error]: Invalid format in '{file_path}'. Each line must contain a question and answer separated by '|'.")
+            except FileNotFoundError:
+                print(Fore.RED + f"[Error]: File '{file_path}' not found.")
     return knowledge_base
 
-# Default knowledge base file path
-file_path = "c:/Users/Domin/OneDrive/Desktop/PythonBIT/SECOND/info.txt"
-knowledge_base = load_knowledge_base(file_path)
+# Path to the folder containing .txt files
+folder_path = "c:/Users/Domin/OneDrive/Desktop/PythonBIT/SECOND/"
+knowledge_base = load_knowledge_base(folder_path)
 
 def show_questions():
     """Display the list of questions."""
@@ -72,7 +74,7 @@ while True:
         else:
             print(Fore.RED + "\n❌ Invalid choice! Please choose a valid number.")
             continue
-        
+
         # Ask if the user wants to ask another question
         while True:
             more = input(Fore.MAGENTA + "\n🔄 Do you want to ask another question? (Y/N) > ").strip().lower()
